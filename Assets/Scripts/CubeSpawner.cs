@@ -1,25 +1,39 @@
 using UnityEngine;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 
-[RequireComponent (typeof(InputReader))]
+[RequireComponent (typeof(Cube))]
 public class CubeSpawner : MonoBehaviour
 {
-    private InputReader _inputReader;
+    private Cube _cube;
+    private List<GameObject> _spawnedCubes;
+
+    public event Action Exploded;
+
+    public List<GameObject> GetSpawnedCubes()
+    {
+        List<GameObject> spawnCubes = new List<GameObject>();
+
+        foreach (GameObject spawnedCube in _spawnedCubes)
+            spawnCubes.Add(spawnedCube);
+
+        return spawnCubes;
+    }
 
     private void Awake()
     {
-        _inputReader = GetComponent<InputReader>();
+        _cube = GetComponent<Cube>();
+        _spawnedCubes = new List<GameObject>();
     }
 
     private void OnEnable()
     {
-        _inputReader.Spawned += Spawn;
+        _cube.Spawned += Spawn;
     }
 
     private void OnDisable()
     {
-        _inputReader.Spawned -= Spawn;
+        _cube.Spawned -= Spawn;
     }
 
     private void Spawn()
@@ -27,8 +41,6 @@ public class CubeSpawner : MonoBehaviour
         int minCubesCount = 2;
         int maxCubesCount = 6;
         int spawnCubesCount = UnityEngine.Random.Range(minCubesCount, maxCubesCount + 1);
-
-        List<GameObject> spawnCubes = new List<GameObject>();
 
         for (int i = 0; i < spawnCubesCount; i++)
         {
@@ -40,26 +52,12 @@ public class CubeSpawner : MonoBehaviour
             cube.GetComponent<MeshRenderer>().material.color = UnityEngine.Random.ColorHSV();
 
             cube.AddComponent<CubeSpawner>();
+            cube.AddComponent<Exploder>();
             cube.AddComponent<Rigidbody>();
 
-            spawnCubes.Add(cube);
+            _spawnedCubes.Add(cube);
         }
 
-        Explode(spawnCubes);
-    }
-
-    private void Explode(List<GameObject> cubes)
-    {
-        float explosionForce = 10;
-        float explosionRadius = 5;
-        Vector3 explosionPosition = transform.position;
-
-        foreach (GameObject cube in cubes)
-        {
-            Rigidbody cubeRigidbody = cube.GetComponent<Rigidbody>();
-
-            if (cubeRigidbody != null)
-                cubeRigidbody.AddExplosionForce(explosionForce, explosionPosition, explosionRadius);
-        }
+        Exploded.Invoke();
     }
 }

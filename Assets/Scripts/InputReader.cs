@@ -3,25 +3,10 @@ using UnityEngine;
 
 public class InputReader : MonoBehaviour
 {
-    private float _spawnChance;
+    public event Action OnCubeClick;
 
-    private static int SpawnCount = 0;
-
-    public event Action Spawned;
-
-    private void Start()
+    private void OnMouseDown()
     {
-        _spawnChance = 1 / Mathf.Pow(2, SpawnCount);
-    }
-
-    void OnMouseDown()
-    {
-        if (UnityEngine.Random.value <= _spawnChance)
-        {
-            Spawned.Invoke();
-            SpawnCount++;
-        }
-
-        Destroy(gameObject);
+        OnCubeClick.Invoke();
     }
 }
