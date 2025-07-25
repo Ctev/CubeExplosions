@@ -7,7 +7,6 @@ public class InputReader : MonoBehaviour
 
     private static int SpawnCount = 0;
 
-    //public int SpawnCount { get; private set; }
     public event Action Spawned;
 
     private void Start()
@@ -17,8 +16,6 @@ public class InputReader : MonoBehaviour
 
     void OnMouseDown()
     {
-        //float spawnChance = 1 / Mathf.Pow(2, SpawnCount);  // Шанс уменьшается с каждым поколением
-
         if (UnityEngine.Random.value <= _spawnChance)
         {
             Spawned.Invoke();
