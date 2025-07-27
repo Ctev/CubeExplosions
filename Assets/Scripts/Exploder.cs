@@ -22,20 +22,20 @@ public class Exploder : MonoBehaviour
         _cubeSpawner.Exploded -= Explode;
     }
 
-    private void Explode()
+    private void Explode(GameObject cube)
     {
-        List<GameObject> cubes = _cubeSpawner.GetSpawnedCubes();
+        List<GameObject> spawnedCubes = _cubeSpawner.GetSpawnedCubes();
 
         float explosionForce = 10;
         float explosionRadius = 5;
-        Vector3 explosionPosition = transform.position;
+        Vector3 explosionPosition = cube.transform.position;
 
-        foreach (GameObject cube in cubes)
+        foreach (GameObject spawnedCube in spawnedCubes)
         {
-            Rigidbody cubeRigidbody = cube.GetComponent<Rigidbody>();
+            Rigidbody SpawnedCubeRigidbody = spawnedCube.GetComponent<Rigidbody>();
 
-            if (cubeRigidbody != null)
-                cubeRigidbody.AddExplosionForce(explosionForce, explosionPosition, explosionRadius);
+            if (SpawnedCubeRigidbody != null)
+                SpawnedCubeRigidbody.AddExplosionForce(explosionForce, explosionPosition, explosionRadius);
         }
     }
 }

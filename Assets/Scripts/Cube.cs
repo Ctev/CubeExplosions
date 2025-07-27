@@ -1,41 +1,20 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(InputReader))]
 public class Cube : MonoBehaviour
 {
-    private InputReader _inputReader;
-    private float _spawnChance;
+    private CubeRaycaster _raycaster;
 
-    private static int SpawnCount = 0;
-
-    public event Action Spawned;
-
+    //public event Action OnClick;
     private void Awake()
     {
-        _inputReader = GetComponent<InputReader>();
-        _spawnChance = 1 / Mathf.Pow(2, SpawnCount);
+        _raycaster = FindObjectOfType<CubeRaycaster>();
     }
     
-    private void OnEnable()
+    public void OnMouseDown()
     {
-        _inputReader.OnCubeClick += ChangeCube;
-    }
+        //OnClick.Invoke();
 
-    private void OnDisable()
-    {
-        _inputReader.OnCubeClick -= ChangeCube;
-    }
-
-    private void ChangeCube()
-    {
-        if (UnityEngine.Random.value <= _spawnChance)
-        {
-            Spawned.Invoke();
-            SpawnCount++;
-        }
-
-        Destroy(gameObject);
+        _raycaster.CubeSplitHander(gameObject);
     }
 }
