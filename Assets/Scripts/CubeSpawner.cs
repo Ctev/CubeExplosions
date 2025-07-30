@@ -2,13 +2,14 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 
-[RequireComponent (typeof(CubeRaycaster))]
+[RequireComponent (typeof(CubeSplitHander))]
 public class CubeSpawner : MonoBehaviour
 {
-    private CubeRaycaster _cubeRaycaster;
+    private CubeSplitHander _cubeSplitHander;
     private List<GameObject> _spawnedCubes;
 
-    public event Action<GameObject> Exploded;
+    public event Action Exploded;
+    public event Action<Cube> ColorChanged;
 
     public List<GameObject> GetSpawnedCubes()
     {
@@ -22,21 +23,21 @@ public class CubeSpawner : MonoBehaviour
 
     private void Awake()
     {
-        _cubeRaycaster = GetComponent<CubeRaycaster>();
+        _cubeSplitHander = GetComponent<CubeSplitHander>();
         _spawnedCubes = new List<GameObject>();
     }
 
     private void OnEnable()
     {
-        _cubeRaycaster.Spawned += Spawn;
+        _cubeSplitHander.Splited += Spawn;
     }
 
     private void OnDisable()
     {
-        _cubeRaycaster.Spawned -= Spawn;
+        _cubeSplitHander.Splited -= Spawn;
     }
 
-    private void Spawn(GameObject cube)
+    private void Spawn(Cube cube)
     {
         int minCubesCount = 2;
         int maxCubesCount = 6;
@@ -49,7 +50,7 @@ public class CubeSpawner : MonoBehaviour
             spawnedCube.transform.position = cube.transform.position;
             spawnedCube.transform.localScale = cube.transform.localScale / 2;
 
-            spawnedCube.GetComponent<MeshRenderer>().material.color = UnityEngine.Random.ColorHSV();
+            ColorChanged.Invoke(spawnedCube.GetComponent<Cube>());
 
             spawnedCube.AddComponent<Cube>();
             spawnedCube.AddComponent<Rigidbody>();
@@ -57,6 +58,6 @@ public class CubeSpawner : MonoBehaviour
             _spawnedCubes.Add(spawnedCube);
         }
 
-        Exploded.Invoke(cube);
+        Exploded.Invoke();
     }
 }

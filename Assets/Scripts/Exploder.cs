@@ -5,10 +5,12 @@ using UnityEngine;
 [RequireComponent(typeof(CubeSpawner))]
 public class Exploder : MonoBehaviour
 {
+    private Cube _cube;
     private CubeSpawner _cubeSpawner;
 
     private void Awake()
     {
+        _cube = GetComponent<Cube>();
         _cubeSpawner = GetComponent<CubeSpawner>();
     }
 
@@ -22,13 +24,13 @@ public class Exploder : MonoBehaviour
         _cubeSpawner.Exploded -= Explode;
     }
 
-    private void Explode(GameObject cube)
+    private void Explode()
     {
         List<GameObject> spawnedCubes = _cubeSpawner.GetSpawnedCubes();
 
         float explosionForce = 10;
         float explosionRadius = 5;
-        Vector3 explosionPosition = cube.transform.position;
+        Vector3 explosionPosition = _cube.transform.position;
 
         foreach (GameObject spawnedCube in spawnedCubes)
         {
