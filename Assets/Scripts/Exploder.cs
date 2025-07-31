@@ -1,43 +1,37 @@
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
-[RequireComponent(typeof(CubeSpawner))]
+//[RequireComponent(typeof(CubeSpawner))]
 public class Exploder : MonoBehaviour
 {
-    private Cube _cube;
-    private CubeSpawner _cubeSpawner;
+    //private CubeSpawner _cubeSpawner;
 
-    private void Awake()
+    //private void Awake()
+    //{
+    //    _cubeSpawner = GetComponent<CubeSpawner>();
+    //}
+
+    //private void OnEnable()
+    //{
+    //    _cubeSpawner.Spawned += Explode;
+    //}
+
+    //private void OnDisable()
+    //{
+    //    _cubeSpawner.Spawned -= Explode;
+    //}
+
+    public void Explode(Cube mainCube, List<Cube> spawnedCubes)
     {
-        _cube = GetComponent<Cube>();
-        _cubeSpawner = GetComponent<CubeSpawner>();
-    }
-
-    private void OnEnable()
-    {
-        _cubeSpawner.Exploded += Explode;
-    }
-
-    private void OnDisable()
-    {
-        _cubeSpawner.Exploded -= Explode;
-    }
-
-    private void Explode()
-    {
-        List<GameObject> spawnedCubes = _cubeSpawner.GetSpawnedCubes();
-
         float explosionForce = 10;
         float explosionRadius = 5;
-        Vector3 explosionPosition = _cube.transform.position;
+        Vector3 explosionPosition = mainCube.transform.position;
 
-        foreach (GameObject spawnedCube in spawnedCubes)
-        {
-            Rigidbody SpawnedCubeRigidbody = spawnedCube.GetComponent<Rigidbody>();
-
-            if (SpawnedCubeRigidbody != null)
-                SpawnedCubeRigidbody.AddExplosionForce(explosionForce, explosionPosition, explosionRadius);
-        }
+        foreach (Cube spawnedCube in spawnedCubes)
+            if (spawnedCube.gameObject.TryGetComponent(out Rigidbody spawnedCubeRigidbody))
+                spawnedCubeRigidbody.AddExplosionForce(explosionForce, explosionPosition, explosionRadius);
     }
 }

@@ -2,28 +2,53 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(CubeSpawner))]
 public class ColorChanger : MonoBehaviour
 {
-    private CubeSpawner _cubeSpawner;
+    // +1. ColorChanger не должен знать про спавнер. Наоборот можно. Спавнер чтоб явно дергал метод ColorChanger, или чтоб куб имел ссылку на
+    // ColorChanger и при инициализации менял цвет. 
 
-    private void Awake()
-    {
-        _cubeSpawner = GetComponent<CubeSpawner>();
-    }
+    // +2. cube.GetComponent<MeshRenderer>() -  Где гарантия, что получим? Не прыгайте через голову (не запрашивайте компоненты других объектов),
+    // мы не можем гарантировать наличие компонента не у себя(не важно, что это объект того же класса). Эту логику надо инкапсулировать. В крайнем
+    // случае TryGetComponent. Подробнее https://t.me/KaDR_gamedev/45
 
-    private void OnEnable()
-    {
-        _cubeSpawner.ColorChanged += Change;
-    }
+    // +3. Считывание ввода лучше отдельным скриптом делать. А куб - это только про состояние самого куба (хранение ссылок на компоненты, множители,
+    // учет вероятности, инициализаця).
 
-    private void OnDisable()
-    {
-        _cubeSpawner.ColorChanged -= Change;
-    }
+    // +4. Помимо упорядочивания методов по доступности, в юнити вводится дополнительное ограничение. Методы событий юнити всегда пишутся выше своих,
+    // даже если доступность их ниже. Так же методы событий юнити лучше писать в порядке их вызова основным потоком. Тоесть первым Awake.
+    // Исключение, что OnEnable, OnDisable можно рядом писать, то все ровно не раньше чем вызывается в очереди OnEnable. Подробнее
+    // https://docs.unity3d.com/Manual/execution-order.html
 
-    private void Change(Cube cube)
+    // +5. GetSpawnedCubes - лишний метод. Сразу после спавна можно возвращать.
+
+    // +6. CubeSplitHander - сущность более высокого уровня. Спавнер про нее знать не должен. Наоборот - да.он будет явно дергать метод спавнера
+    // получать кубы. Общая схема программы такая:
+
+    // Куб не должен знать ни про взрыв, ни про спавнер. По идее, я бы вообще делал так, чтобы функциональные члены не знали друг о друге.
+    // Просто есть класс Спавнер, который знает только про кубы, есть куб, который не знает ни о ком и взрыватель - ни о ком (можно чтоб про
+    // кубы знал, тк это сущность более низкого уровня). Есть какой-то рейкастер, который стреляет лучами и если попал в куб - кидает событие
+    // с параметром - куб.
+
+    // Это событие ловит класс, который знает про спавнер и взрыватель. Они проверяет пришедший куб на вероятность деления и если оно попадаем
+    // в вероятность, дергаем сначала метод спавнера, потом взрывателя. Все скрипты кроме куба(и мб ColorChanger) прсутствуют на сцене в
+    // единственном экземпляре.
+
+    // +7. cube.transform.localScale / 2; - маичесоке чсило.
+
+    // +8. public event Action Exploded; - Спавнер ничего не знает про взрыв. Это не его ответсвенность.
+
+    // 9. GameObject spawnedCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+    // spawnedCube.AddComponent<Cube>(); - не усложняйте логику, создавайте из префаба.
+
+    // 10. Создавать поле типа GameObject(и в целом, работа с ним) - плохая практика. Туда можно что угодно поместить. И не понятна зона
+    // ответственности и область применения. Всегда лучше конкретизировать по другим компонентам.
+    // https://ijunior-knowledge-base.gitbook.io/baza-znanii-yayunior/unity/dinamicheskoe-izmenenie-obektov/sozdanie-obektov
+    // https://agava.notion.site/cb2f8b5609d64fefb13e4fe69e4c1b88
+
+    //private Cube _cube;
+
+    public void Change(MeshRenderer cubeRender)
     {
-        cube.GetComponent<MeshRenderer>().material.color = Random.ColorHSV();
+        cubeRender.material.color = Random.ColorHSV();
     }
 }
